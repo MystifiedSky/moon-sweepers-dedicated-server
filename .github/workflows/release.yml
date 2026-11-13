@@ -1,0 +1,154 @@
+name: release
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  version:
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    outputs:
+      value: ${{ steps.version.outputs.value }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - id: version
+        name: Allocate a version for this main build
+        env:
+          BUILD_NUMBER: ${{ github.run_number }}
+        run: |
+          python - <<'PY'
+          import os, tomllib
+          with open('Cargo.toml', 'rb') as f:
+              major, minor, patch = map(int, tomllib.load(f)['package']['version'].split('.'))
+          version = f'{major}.{minor}.{patch + int(os.environ["BUILD_NUMBER"])}'
+          with open(os.environ['GITHUB_OUTPUT'], 'a') as f:
+              f.write(f'value={version}\n')
+          print(f'Release version: {version}')
+          PY
+  mod:
+    needs: version
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '10.0.x'
+      - run: python scripts/set-release-version.py ${{ needs.version.outputs.value }}
+      - run: dotnet restore mod/MoonDedicated --locked-mode
+      - run: dotnet build -c Release mod/MoonDedicated --no-restore
+      - run: dotnet restore mod/MoonLoaderCompatibility --locked-mode
+      - run: dotnet build -c Release mod/MoonLoaderCompatibility --no-restore
+      - run: dotnet restore checks/loader-compatibility --locked-mode
+      - run: dotnet run -c Release --project checks/loader-compatibility --no-restore
+      - run: dotnet restore checks/audit-2026-11-14/protocol/ProtocolAudit.csproj --locked-mode
+      - run: dotnet run -c Release --project checks/audit-2026-11-14/protocol/ProtocolAudit.csproj --no-restore
+      - uses: actions/upload-artifact@v4
+        with:
+          name: compiled-mod
+          path: |
+            mod/MoonDedicated.dll
+            mod/MoonLoaderCompatibility.dll
+          if-no-files-found: error
+  server:
+    needs: [version, mod]
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: windows-latest
+            platform: windows
+            exe: moon-ds.exe
+          - os: ubuntu-latest
+            platform: linux
+            exe: moon-ds
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          components: clippy, rustfmt
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - uses: actions/download-artifact@v4
+        with:
+          name: compiled-mod
+          path: mod
+      - run: python scripts/set-release-version.py ${{ needs.version.outputs.value }}
+      - name: Update only workspace version in the lockfile
+        run: cargo update --workspace
+      - run: python checks/test_release.py
+      - run: cargo fmt --check
+      - run: cargo clippy --locked --all-targets -- -D warnings
+      - run: cargo test --locked
+      - run: cargo test --locked --manifest-path checks/audit-2026-11-14/Cargo.toml
+      - run: cargo build --locked --manifest-path checks/audit-2-2026-11-14/Cargo.toml --bin audit-game
+      - run: cargo test --locked --manifest-path checks/audit-2-2026-11-14/Cargo.toml --lib -- --test-threads=1
+      - run: cargo build --release --locked
+      - name: Check shutdown and backup with an isolated child
+        env:
+          MOON_TEST_EXE: ${{ github.workspace }}/target/release/${{ matrix.exe }}
+        run: python checks/audit-2026-11-14/runtime_regressions.py
+      - run: python scripts/package-release.py --platform ${{ matrix.platform }} --version ${{ needs.version.outputs.value }}
+      - uses: actions/upload-artifact@v4
+        with:
+          name: release-${{ matrix.platform }}
+          path: dist/*
+          if-no-files-found: error
+  publish:
+    needs: [version, server]
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          pattern: release-*
+          path: release
+          merge-multiple: true
+      - id: release
+        uses: softprops/action-gh-release@v3
+        with:
+          tag_name: v${{ needs.version.outputs.value }}
+          name: Moon Dedicated v${{ needs.version.outputs.value }}
+          target_commitish: ${{ github.sha }}
+          draft: true
+          make_latest: legacy
+          fail_on_unmatched_files: true
+          generate_release_notes: true
+          body: |
+            Built from main commit ${{ github.sha }} after automated checks passed.
+
+            Players: download **moon-client.zip**, install with BepInEx and the Moon Sweepers patcher, then choose JOIN SERVER in the game.
+
+            Windows hosts: download **moon-ds-windows-x86_64.zip**, extract it, and run **moon-server.exe**.
+
+            Linux/AMP hosts: download **moon-ds-linux-x86_64.zip**. Linux needs Wine and Xvfb.
+
+            A prepared, owned copy of Moon Sweepers is required. The game, BepInEx and patcher are not bundled. Client and server share this release version. Each asset has a SHA-256 checksum. Read the included upgrade instructions before updating an existing world.
+          files: |
+            release/moon-client.zip
+            release/moon-client.zip.sha256
+            release/MoonDedicated.dll
+            release/MoonDedicated.dll.sha256
+            release/MoonLoaderCompatibility.dll
+            release/MoonLoaderCompatibility.dll.sha256
+            release/moon-ds-windows-x86_64.zip
+            release/moon-ds-windows-x86_64.zip.sha256
+            release/moon-ds-linux-x86_64.zip
+            release/moon-ds-linux-x86_64.zip.sha256
+
+      - name: Publish only after every asset is uploaded
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_REPO: ${{ github.repository }}
+          RELEASE_ID: ${{ steps.release.outputs.id }}
+        run: gh api --method PATCH repos/"$GH_REPO"/releases/"$RELEASE_ID" -F draft=false -f make_latest=legacy

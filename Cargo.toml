@@ -1,0 +1,23 @@
+[package]
+name = "moon-ds"
+version = "0.1.7"
+edition = "2021"
+rust-version = "1.89"
+description = "Dedicated server manager and server browser for Moon Sweepers (Windows + Linux)"
+license = "GPL-3.0-or-later"
+default-run = "moon-ds"
+
+[dependencies]
+macroquad = { version = "0.4", default-features = false }
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+zip = { version = "2", default-features = false, features = ["deflate"] }
+ctrlc = { version = "3", features = ["termination"] }
+
+[target.'cfg(windows)'.dependencies]
+windows-sys = { version = "0.59", features = ["Win32_UI_WindowsAndMessaging", "Win32_Foundation"] }
+
+[profile.release]
+opt-level = 3
+lto = "thin"
+strip = true

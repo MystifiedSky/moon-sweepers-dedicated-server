@@ -1,0 +1,16 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>net6.0</TargetFramework>
+    <Version>0.1.7</Version>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <RestorePackagesWithLockFile>true</RestorePackagesWithLockFile>
+    <RestoreSources>https://api.nuget.org/v3/index.json;https://nuget.bepinex.dev/v3/index.json</RestoreSources>
+  </PropertyGroup>
+  <ItemGroup>
+    <PackageReference Include="BepInEx.Preloader.Core" Version="6.0.0-be.793" IncludeAssets="compile" />
+    <Compile Include="../MoonDedicated/BuildVersion.cs" Link="BuildVersion.cs" />
+  </ItemGroup>
+  <Target Name="CopyPayload" AfterTargets="Build" Condition="'$(Configuration)' == 'Release'">
+    <Copy SourceFiles="$(OutputPath)MoonLoaderCompatibility.dll" DestinationFolder="$(MSBuildProjectDirectory)/.." />
+  </Target>
+</Project>

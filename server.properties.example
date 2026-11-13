@@ -1,0 +1,41 @@
+# Moon Sweepers dedicated server settings.
+# The same names work as environment variables and (lower-case, without MOON_) as --options.
+# Quotes around values are optional. An empty value means "disabled / default".
+
+MOON_SERVER_NAME=Moon Sweepers Dedicated Server
+MOON_MOTD=
+
+# Optional join password. Empty = no password (the default).
+MOON_SERVER_PASSWORD=
+# Optional comma-separated list of player SteamID64s allowed to join. Empty = everyone (the default).
+MOON_ALLOWED_STEAM_IDS=
+
+# UDP ports. Players join with  <your address>:<query port>  (the query port also answers server-browser pings).
+MOON_GAME_PORT=27025
+MOON_QUERY_PORT=27026
+
+MOON_MAX_PLAYERS=8
+MOON_SLOT=1
+MOON_AUTOSAVE_MINUTES=10
+
+# Mods players must have to join: BepInEx plugin GUIDs, optionally GUID@version, comma separated.
+MOON_REQUIRED_MODS=
+# off | required | strict (strict = players may not run any other mods)
+MOON_MOD_POLICY=required
+
+MOON_BACKUP_KEEP=10
+MOON_BACKUP_ON_STOP=true
+
+# Folder holding a copy of the game (MoonSweepers.exe) with BepInEx + the Moon Sweepers patcher installed.
+MOON_GAME_DIR=game
+MOON_DATA_DIR=data
+# Optional: folder with Valve's Steamworks redistributable (steamclient64.dll, tier0_s64.dll, vstdlib_s64.dll).
+MOON_STEAM_REDIST_DIR=
+# List the server in Steam's public server browser (off by default).
+MOON_STEAM_LISTING=false
+# Frame cap of the headless game (10-120). Steady pacing keeps the simulation in step with players.
+MOON_SERVER_FPS=30
+# Linux only: wine binary used to run the Windows game, and the seconds allowed for a clean stop.
+MOON_WINE=wine
+MOON_STOP_TIMEOUT=120
+MOON_AUTO_RESTART=0

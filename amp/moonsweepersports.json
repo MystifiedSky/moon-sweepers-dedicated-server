@@ -1,0 +1,22 @@
+[
+    {
+        "Protocol": "UDP",
+        "Port": 27025,
+        "Offset": 0,
+        "Range": 1,
+        "Ref": "GamePort",
+        "Name": "Game Port",
+        "Description": "Steam game-server port (MOON_GAME_PORT)",
+        "ChildPorts": null
+    },
+    {
+        "Protocol": "UDP",
+        "Port": 27026,
+        "Offset": 0,
+        "Range": 1,
+        "Ref": "QueryPort",
+        "Name": "Query Port",
+        "Description": "Server-browser query port (MOON_QUERY_PORT). Players join with <address>:<this port>",
+        "ChildPorts": null
+    }
+]

@@ -1,0 +1,117 @@
+[
+    {
+        "UpdateStageName": "Download Game (SteamCMD)",
+        "UpdateSourcePlatform": "All",
+        "UpdateSource": "SteamCMD",
+        "UpdateSourceData": "5335510",
+        "UpdateSourceArgs": "5335510",
+        "UpdateSourceConditionSetting": "GameSource",
+        "UpdateSourceConditionValue": "steam",
+        "SkipOnFailure": false,
+        "ForceDownloadPlatform": "Windows"
+    },
+    {
+        "UpdateStageName": "Download Steamworks Redistributable",
+        "UpdateSourcePlatform": "All",
+        "UpdateSource": "SteamCMD",
+        "UpdateSourceData": "1007",
+        "UpdateSourceArgs": "1007",
+        "UpdateSourceConditionSetting": "GameSource",
+        "UpdateSourceConditionValue": "steam",
+        "SkipOnFailure": true,
+        "ForceDownloadPlatform": "Windows"
+    },
+    {
+        "UpdateStageName": "Download Server Manager",
+        "UpdateSourcePlatform": "Windows",
+        "UpdateSource": "GithubRelease",
+        "UpdateSourceData": "moon-ds-windows-x86_64.zip",
+        "UpdateSourceArgs": "{{ReleaseRepo}}",
+        "UpdateSourceTarget": "{{$FullBaseDir}}",
+        "SkipOnFailure": false,
+        "UnzipUpdateSource": true,
+        "OverwriteExistingFiles": true,
+        "DeleteAfterExtract": true
+    },
+    {
+        "UpdateStageName": "Download Server Manager",
+        "UpdateSourcePlatform": "Linux",
+        "UpdateSource": "GithubRelease",
+        "UpdateSourceData": "moon-ds-linux-x86_64.zip",
+        "UpdateSourceArgs": "{{ReleaseRepo}}",
+        "UpdateSourceTarget": "{{$FullBaseDir}}",
+        "SkipOnFailure": false,
+        "UnzipUpdateSource": true,
+        "OverwriteExistingFiles": true,
+        "DeleteAfterExtract": true,
+        "UpdateSourceArch": "x86_64"
+    },
+    {
+        "UpdateStageName": "Make Server Manager Executable",
+        "UpdateSourcePlatform": "Linux",
+        "UpdateSource": "Executable",
+        "UpdateSourceData": "/bin/chmod",
+        "UpdateSourceArgs": "+x {{$FullBaseDir}}moon-ds",
+        "SkipOnFailure": false
+    },
+    {
+        "UpdateStageName": "Copy Game Folder",
+        "UpdateSourcePlatform": "Windows",
+        "UpdateSource": "Executable",
+        "UpdateSourceData": "{{$FullBaseDir}}moon-ds.exe",
+        "UpdateSourceArgs": "import \"{{GameSourcePath}}\" --game-dir \"{{$FullBaseDir}}\"",
+        "UpdateSourceConditionSetting": "GameSource",
+        "UpdateSourceConditionValue": "copy",
+        "SkipOnFailure": false
+    },
+    {
+        "UpdateStageName": "Copy Game Folder",
+        "UpdateSourcePlatform": "Linux",
+        "UpdateSource": "Executable",
+        "UpdateSourceData": "{{$FullBaseDir}}moon-ds",
+        "UpdateSourceArgs": "import \"{{GameSourcePath}}\" --game-dir \"{{$FullBaseDir}}\"",
+        "UpdateSourceConditionSetting": "GameSource",
+        "UpdateSourceConditionValue": "copy",
+        "SkipOnFailure": false
+    },
+    {
+        "UpdateStageName": "Create server.properties",
+        "UpdateSourcePlatform": "Windows",
+        "UpdateSource": "Executable",
+        "UpdateSourceData": "{{$FullBaseDir}}moon-ds.exe",
+        "UpdateSourceArgs": "init \"{{$FullBaseDir}}\"",
+        "SkipOnFailure": true
+    },
+    {
+        "UpdateStageName": "Create server.properties",
+        "UpdateSourcePlatform": "Linux",
+        "UpdateSource": "Executable",
+        "UpdateSourceData": "{{$FullBaseDir}}moon-ds",
+        "UpdateSourceArgs": "init \"{{$FullBaseDir}}\"",
+        "SkipOnFailure": true
+    },
+    {
+        "UpdateStageName": "Install Mod and Steamworks Files",
+        "UpdateSourcePlatform": "Windows",
+        "UpdateSource": "Executable",
+        "UpdateSourceData": "{{$FullBaseDir}}moon-ds.exe",
+        "UpdateSourceArgs": "prepare --config \"{{$FullBaseDir}}server.properties\" --game-dir \"{{$FullBaseDir}}\" --steam-redist-dir \"{{$FullBaseDir}}\"",
+        "SkipOnFailure": true
+    },
+    {
+        "UpdateStageName": "Install Mod and Steamworks Files",
+        "UpdateSourcePlatform": "Linux",
+        "UpdateSource": "Executable",
+        "UpdateSourceData": "{{$FullBaseDir}}moon-ds",
+        "UpdateSourceArgs": "prepare --config \"{{$FullBaseDir}}server.properties\" --game-dir \"{{$FullBaseDir}}\" --steam-redist-dir \"{{$FullBaseDir}}\"",
+        "SkipOnFailure": true
+    },
+    {
+        "UpdateStageName": "Initialise Wine",
+        "UpdateSourcePlatform": "Linux",
+        "UpdateSource": "Executable",
+        "UpdateSourceData": "/bin/bash",
+        "UpdateSourceArgs": "-c \"mkdir -p \\\"{{$FullBaseDir}}moon-data\\\" && WINEPREFIX=\\\"{{$FullBaseDir}}moon-data/wine\\\" WINEARCH=win64 WINEDEBUG=-all /usr/bin/wineboot --init\"",
+        "SkipOnFailure": true
+    }
+]
