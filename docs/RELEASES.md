@@ -15,17 +15,17 @@ GitHub Actions must be enabled for the repository. The workflow gives only its f
 1. Read the base version from Cargo.toml and add this release workflow's `github.run_number` to its patch component. For example, base `0.1.0` and run 12 produce **0.1.12**. Each new workflow run gets a new version; re-running the same run targets the same version.
 2. Stamp that version into Cargo, both DLL projects, and shared plugin metadata. These build-time edits are not committed or pushed back to main.
 3. Build and test the plugin, then build/test Windows and Linux managers. Protocol, manager process, backup, parser and audit regression checks gate packaging. CI cannot run the copyrighted game; the native acceptance checks remain a maintainer responsibility.
-4. Package only an explicit set of distribution files. Installed games, personal saves, local investigation/session files and raw test captures are excluded.
+4. Package only an explicit set of distribution files. The client ZIP uses explicit BepInEx plugin/patcher folders for Vortex and manual extraction. Verify its actual DLL/document payloads, layout, version, CRCs and SHA-256 before uploading artifacts. Installed games, personal saves, local investigation/session files and raw test captures are excluded.
 5. After **both server platforms** succeed, publish one release tagged `v<version>` at the exact triggering commit, with all files attached together. A failed build publishes no release. There is no cancellation policy that deliberately discards earlier main pushes.
 
 ## Release assets
 
 | Asset | Audience |
 |---|---|
-| `moon-client.zip` | Players: DLL, client installer and self-contained instructions |
+| `moon-client.zip` | Players: Vortex/manual-install BepInEx folder layout with both DLLs and instructions |
 | `MoonDedicated.dll` and `MoonLoaderCompatibility.dll` | Manual updates; install in plugins and patchers respectively |
 | `moon-ds-windows-x86_64.zip` | Windows hosts: moon-server.exe, advanced manager, DLL, AMP files and guides |
-| `moon-ds-linux-x86_64.zip` | Linux/AMP hosts: native manager/host entry, Windows DLL, AMP files and guides |
+| `moon-ds-linux-x86_64.zip` | Linux hosts: native manager/host entry, Windows DLL, AMP files and guides |
 | Each asset's `.sha256` | SHA-256 checksum for that file |
 
 Versioned release pages retain old builds. The Latest badge uses GitHub's semantic-version ordering. AMP's expected server ZIP names remain stable; set its Release Repository to this repository's `owner/name` after creating it.

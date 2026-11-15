@@ -1,17 +1,45 @@
 # Install the Moon Dedicated client
 
-Requires an owned copy of **Moon Sweepers 1.0.5**, Steam, **BepInEx 6 IL2CPP Windows x64**, and the Moon Sweepers BepInEx Patcher: https://www.nexusmods.com/moonsweepers/mods/9 . Follow the patcher's installation instructions, start the game once, then close it.
+## Requirements
 
-1. Extract this ZIP.
-2. From the extracted folder, run:
+- An owned Steam copy of **Moon Sweepers 1.0.5** on **Windows x64**.
+- **Steam running and online** when joining a server.
+- **BepInEx 6, Unity IL2CPP, Windows x64**. Use the build specified by the [Moon Sweepers BepInEx Patcher](https://www.nexusmods.com/moonsweepers/mods/9); Mono and CoreCLR loader packages are not interchangeable with the IL2CPP package.
+- The [Moon Sweepers BepInEx Patcher](https://www.nexusmods.com/moonsweepers/mods/9), installed separately. Keep it installed alongside the compatibility patcher included here.
+- Both included DLLs: `MoonDedicated.dll` and `MoonLoaderCompatibility.dll`.
+- A compatible dedicated server, its address/query port, and its password if required. Use matching client/server releases and install any additional mods required by the host.
+- **For Vortex installation only:** [Vortex](https://www.nexusmods.com/about/vortex/) and the [Moon Sweepers Vortex Extension](https://www.nexusmods.com/site/mods/2517). Vortex is optional for manual installation.
 
-   ```powershell
-   .\scripts\install-client.ps1 -GameDir "D:\SteamLibrary\steamapps\common\Moon Sweepers"
+The game, BepInEx, the required Nexus patcher and the Vortex extension are separate requirements; they are not bundled in the client ZIP.
+
+## Installation instructions
+
+### With Vortex
+
+1. Install Vortex and the [Moon Sweepers Vortex Extension](https://www.nexusmods.com/site/mods/2517), then select Moon Sweepers as a managed game. Restart Vortex if the extension requests it.
+2. Install **BepInEx 6 Unity IL2CPP Windows x64** and the [Moon Sweepers BepInEx Patcher](https://www.nexusmods.com/moonsweepers/mods/9), following the patcher's instructions. Start the game once to finish loader setup, then close it. Follow any additional restart instructions on the patcher's page.
+3. Download this mod using **Mod Manager Download**, or use Vortex's **Install From File** to select `moon-client.zip`. Keep the ZIP intact when importing it into Vortex.
+4. Enable the mod and **Deploy Mods**. The ZIP installs the client plugin and compatibility patcher into their respective BepInEx folders; no PowerShell script is needed.
+5. Start Steam and Moon Sweepers. Select **JOIN SERVER**, below **QUIT GAME**.
+
+### Manually
+
+1. Install the same BepInEx and Moon Sweepers patcher prerequisites, start the game once, then close it.
+2. Extract `moon-client.zip` and copy its `BepInEx` folder into your own Moon Sweepers game folder, merging folders when prompted.
+3. Confirm that the DLLs are in these locations relative to your game folder:
+
+   ```text
+   BepInEx/plugins/MoonDedicated/MoonDedicated.dll
+   BepInEx/patchers/MoonDedicated/MoonLoaderCompatibility.dll
    ```
 
-   For manual installation, copy `mod/MoonDedicated.dll` into `BepInEx/plugins/MoonDedicated/` and `mod/MoonLoaderCompatibility.dll` into `BepInEx/patchers/MoonDedicated/`. Keep the Nexus patcher installed too. Replace files with the game closed; keep one active copy of each DLL.
-3. Start Steam and the game. Choose **JOIN SERVER** below **QUIT GAME**.
-4. Add a label and the host's address/query port, for example `play.example.com:27026`. Save, select the entry, refresh its details and choose **Join server**. Enter the password if required.
+4. Start Steam and the game, then select **JOIN SERVER**.
+
+When upgrading, close the game first and keep only one active copy of each included DLL. Remove older manual copies of these two DLLs from other locations before switching to Vortex. Keep the separate Moon Sweepers BepInEx Patcher installed.
+
+## Connect
+
+Add a label and the host's address/query port, for example `play.example.com:27026`. Save, select the entry, refresh its details and choose **Join server**. Enter the password if required.
 
 The browser stays inside the game. No external browser executable is required. Saved servers can be edited, deleted or marked as favourites. Passwords are not saved in that list; the transient join request is deleted when the mod reads it. Mouse navigation and keyboard text entry are supported; controller navigation is not implemented.
 

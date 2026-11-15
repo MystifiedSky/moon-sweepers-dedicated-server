@@ -98,6 +98,9 @@ jobs:
           MOON_TEST_EXE: ${{ github.workspace }}/target/release/${{ matrix.exe }}
         run: python checks/audit-2026-11-14/runtime_regressions.py
       - run: python scripts/package-release.py --platform ${{ matrix.platform }} --version ${{ needs.version.outputs.value }}
+      - name: Verify Vortex client archive layout and payloads
+        if: matrix.platform == 'windows'
+        run: python scripts/verify-client-package.py --version ${{ needs.version.outputs.value }}
       - uses: actions/upload-artifact@v4
         with:
           name: release-${{ matrix.platform }}
@@ -127,11 +130,11 @@ jobs:
           body: |
             Built from main commit ${{ github.sha }} after automated checks passed.
 
-            Players: download **moon-client.zip**, install with BepInEx and the Moon Sweepers patcher, then choose JOIN SERVER in the game.
+            Players: download **moon-client.zip**, install through Vortex with the Moon Sweepers extension, or merge its BepInEx folder into your game folder. BepInEx and the Moon Sweepers patcher are required. Choose JOIN SERVER in the game.
 
             Windows hosts: download **moon-ds-windows-x86_64.zip**, extract it, and run **moon-server.exe**.
 
-            Linux/AMP hosts: download **moon-ds-linux-x86_64.zip**. Linux needs Wine and Xvfb.
+            Linux hosts: download **moon-ds-linux-x86_64.zip**. Linux needs Wine and Xvfb. AMP control-panel hosts use the included AMP template, which selects the package for the host operating system.
 
             A prepared, owned copy of Moon Sweepers is required. The game, BepInEx and patcher are not bundled. Client and server share this release version. Each asset has a SHA-256 checksum. Read the included upgrade instructions before updating an existing world.
           files: |

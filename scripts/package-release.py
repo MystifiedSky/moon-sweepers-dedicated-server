@@ -9,11 +9,19 @@ ROOT = pathlib.Path(__file__).resolve().parents[1]
 DOCS = ("INSTALL.md", "CONFIG.md", "HOW-IT-WORKS.md", "CLIENT.md", "RELEASES.md", "LOADER-COMPATIBILITY.md", "AUDIT-CLEANING-2026-11-14.md")
 
 
-def archive(path, files, version):
+def archive(path, files, version, version_path="VERSION.txt"):
     with zipfile.ZipFile(path, "w", compression=zipfile.ZIP_DEFLATED) as bundle:
+        # Explicit directory entries also let mod-manager installers identify
+        # the loader folders without depending on archive-browser inference.
+        directories = sorted({str(parent).replace("\\", "/") + "/"
+                              for _, target in files
+                              for parent in pathlib.PurePosixPath(target).parents
+                              if str(parent) != "."})
+        for directory in directories:
+            bundle.writestr(directory, "")
         for source, target in files:
             bundle.write(source, target)
-        bundle.writestr("VERSION.txt", version + "\n")
+        bundle.writestr(version_path, version + "\n")
     with zipfile.ZipFile(path) as bundle:
         bad = bundle.testzip()
         if bad:
@@ -40,11 +48,14 @@ def package(platform, version, output):
     files += [(ROOT / "scripts/install-client.ps1", "scripts/install-client.ps1")]
     archive(output / f"moon-ds-{platform}-x86_64.zip", files, version)
     if platform == "windows":
-        archive(output / "moon-client.zip", [(mod, "mod/MoonDedicated.dll"),
-                (compatibility, "mod/MoonLoaderCompatibility.dll"),
-                (ROOT / "scripts/install-client.ps1", "scripts/install-client.ps1"),
-                (ROOT / "docs/CLIENT.md", "README.md"), (ROOT / "LICENSE.md", "LICENSE.md"),
-                (ROOT / "CREDITS.md", "CREDITS.md")], version)
+        client_docs = "BepInEx/plugins/MoonDedicated/docs"
+        archive(output / "moon-client.zip", [
+                (mod, "BepInEx/plugins/MoonDedicated/MoonDedicated.dll"),
+                (compatibility, "BepInEx/patchers/MoonDedicated/MoonLoaderCompatibility.dll"),
+                (ROOT / "docs/CLIENT.md", f"{client_docs}/README.md"),
+                (ROOT / "LICENSE.md", f"{client_docs}/LICENSE.md"),
+                (ROOT / "CREDITS.md", f"{client_docs}/CREDITS.md")], version,
+                version_path=f"{client_docs}/VERSION.txt")
         for payload in (mod, compatibility):
             shutil.copy2(payload, output / payload.name)
             checksum(output / payload.name)

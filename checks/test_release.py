@@ -47,15 +47,39 @@ class Releases(unittest.TestCase):
             for name in ("moon-client.zip", "moon-ds-windows-x86_64.zip", "moon-ds-linux-x86_64.zip"):
                 path = root / "dist" / name
                 with zipfile.ZipFile(path) as bundle:
-                    self.assertIn("mod/MoonDedicated.dll", bundle.namelist())
-                    self.assertIn("mod/MoonLoaderCompatibility.dll", bundle.namelist())
-                    self.assertEqual(bundle.read("VERSION.txt"), b"0.1.57\n")
                     self.assertFalse(any("craft" in p or p.startswith("server/") or "private" in p for p in bundle.namelist()))
                     if name == "moon-client.zip":
                         self.assertFalse(any(p.endswith(".exe") for p in bundle.namelist()))
-                        self.assertIn("scripts/install-client.ps1", bundle.namelist())
+                        expected = {
+                            "BepInEx/plugins/MoonDedicated/MoonDedicated.dll",
+                            "BepInEx/patchers/MoonDedicated/MoonLoaderCompatibility.dll",
+                            *(f"BepInEx/plugins/MoonDedicated/docs/{n}" for n in ("README.md", "LICENSE.md", "CREDITS.md", "VERSION.txt")),
+                        }
+                        self.assertEqual({n for n in bundle.namelist() if not n.endswith("/")}, expected)
+                        self.assertEqual(bundle.read("BepInEx/plugins/MoonDedicated/docs/VERSION.txt"), b"0.1.57\n")
+                        self.assertIn("BepInEx/plugins/", bundle.namelist())
+                        self.assertIn("BepInEx/patchers/", bundle.namelist())
+                        self.assertEqual(bundle.read("BepInEx/plugins/MoonDedicated/MoonDedicated.dll"), (root / "mod/MoonDedicated.dll").read_bytes())
+                        self.assertEqual(bundle.read("BepInEx/patchers/MoonDedicated/MoonLoaderCompatibility.dll"), (root / "mod/MoonLoaderCompatibility.dll").read_bytes())
+                        module("verify-client-package").verify(path, "0.1.57", root)
+                        # A layout regression must be rejected even with a valid ZIP/checksum.
+                        bad = root / "dist/wrong-client.zip"
+                        with zipfile.ZipFile(bad, "w") as broken:
+                            written = set()
+                            for info in bundle.infolist():
+                                target = info.filename.replace("BepInEx/patchers/", "BepInEx/plugins/")
+                                if target not in written:
+                                    broken.writestr(target, bundle.read(info))
+                                    written.add(target)
+                        packer.checksum(bad)
+                        with self.assertRaises(AssertionError):
+                            module("verify-client-package").verify(bad, "0.1.57", root)
+
                     else:
                         self.assertIn("docs/INSTALL.md", bundle.namelist())
+                        self.assertIn("mod/MoonDedicated.dll", bundle.namelist())
+                        self.assertIn("mod/MoonLoaderCompatibility.dll", bundle.namelist())
+                        self.assertEqual(bundle.read("VERSION.txt"), b"0.1.57\n")
                 self.assertEqual(path.with_name(name + ".sha256").read_text().split()[0], hashlib.sha256(path.read_bytes()).hexdigest())
 
 

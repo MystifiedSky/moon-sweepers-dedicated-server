@@ -15,4 +15,6 @@ if ($LASTEXITCODE -ne 0) { throw "Manager build failed" }
 $releaseVersion = (Select-String -LiteralPath Cargo.toml -Pattern '^version = "([0-9.]+)"').Matches[0].Groups[1].Value
 python scripts/package-release.py --platform windows --version $releaseVersion
 if ($LASTEXITCODE -ne 0) { throw "Packaging or verification failed" }
+python scripts/verify-client-package.py --version $releaseVersion
+if ($LASTEXITCODE -ne 0) { throw "Client archive validation failed" }
 Write-Host "dist/moon-client.zip and dist/moon-ds-windows-x86_64.zip"

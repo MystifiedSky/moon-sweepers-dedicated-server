@@ -6,7 +6,7 @@ You must own Moon Sweepers. Game files, BepInEx and the game patcher are **not b
 
 ## Choose a download
 
-Open this repository's **Releases** page and download the latest matching package. Use client and server files from the same release.
+Open this repository's [**Releases** page](https://github.com/MystifiedSky/moon-sweepers-dedicated-server/releases) and download the latest matching package. Use client and server files from the same release.
 
 | Purpose | Download |
 |---|---|
@@ -16,22 +16,52 @@ Open this repository's **Releases** page and download the latest matching packag
 | Host through the AMP control panel | Use the template in `amp/`; AMP downloads the package for its host operating system |
 | Manually update an already prepared client | **MoonDedicated.dll** and **MoonLoaderCompatibility.dll** |
 
-Extract ZIPs before running anything. Each download has a matching `.sha256` checksum. Download release assets rather than GitHub's automatically generated **Source code** ZIPs. Releases become available after this local project is first pushed to GitHub and its workflow succeeds.
+For Vortex, import the client ZIP directly. For manual installation or hosting, extract the appropriate ZIP first. Each download has a matching `.sha256` checksum. Download release assets rather than GitHub's automatically generated **Source code** ZIPs. The main-branch release workflow builds the client and server packages together.
+
+## Client requirements
+
+- An owned Steam copy of **Moon Sweepers 1.0.5** on **Windows x64**.
+- **Steam running and online** when joining a server.
+- **BepInEx 6, Unity IL2CPP, Windows x64**. Use the build specified by the [Moon Sweepers BepInEx Patcher](https://www.nexusmods.com/moonsweepers/mods/9); Mono and CoreCLR loader packages are not interchangeable with the IL2CPP package.
+- The [Moon Sweepers BepInEx Patcher](https://www.nexusmods.com/moonsweepers/mods/9), installed separately. Keep it installed alongside the compatibility patcher included here.
+- Both included DLLs: `MoonDedicated.dll` and `MoonLoaderCompatibility.dll`.
+- A compatible dedicated server, its address/query port, and its password if required. Use matching client/server releases and install any additional mods required by the host.
+- **For Vortex installation only:** [Vortex](https://www.nexusmods.com/about/vortex/) and the [Moon Sweepers Vortex Extension](https://www.nexusmods.com/site/mods/2517). Vortex is optional for manual installation.
+
+The game, BepInEx, the required Nexus patcher and the Vortex extension are separate requirements; they are not bundled in the client ZIP.
 
 ## Join a server
 
-1. Install **BepInEx 6 IL2CPP, Windows x64**, and the [Moon Sweepers BepInEx Patcher](https://www.nexusmods.com/moonsweepers/mods/9), following the patcher's instructions. Start the game once, then close it.
-2. Extract `moon-client.zip`. With the game closed, install the two DLLs in your own Moon Sweepers installation:
+### With Vortex
 
-   * Put `MoonDedicated.dll` in the **mod directory**, `BepInEx/plugins/`. You can use a `MoonDedicated` subfolder to keep it organized.
-   * Put `MoonLoaderCompatibility.dll` in `BepInEx/patchers/MoonDedicated/`. This is a loader patcher and belongs in `patchers`.
+1. Install Vortex and the [Moon Sweepers Vortex Extension](https://www.nexusmods.com/site/mods/2517), then select Moon Sweepers as a managed game. Restart Vortex if the extension requests it.
+2. Install **BepInEx 6 Unity IL2CPP Windows x64** and the [Moon Sweepers BepInEx Patcher](https://www.nexusmods.com/moonsweepers/mods/9), following the patcher's instructions. Start the game once to finish loader setup, then close it. Follow any additional restart instructions on the patcher's page.
+3. Download this mod using **Mod Manager Download**, or use Vortex's **Install From File** to select `moon-client.zip`. Keep the ZIP intact when importing it into Vortex.
+4. Enable the mod and **Deploy Mods**. The ZIP installs the client plugin and compatibility patcher into their respective BepInEx folders; no PowerShell script is needed.
+5. Start Steam and Moon Sweepers. Select **JOIN SERVER**, below **QUIT GAME**.
 
-   Keep one active copy of each DLL, and keep the required Nexus patcher installed. Your game can be installed anywhere; these paths are relative to its folder.
+### Manually
 
-3. Start Steam and Moon Sweepers. Choose **JOIN SERVER**, below **QUIT GAME**.
-4. Choose **Add server**, enter a label and the host's address, such as `play.example.com:27026`, then save. Select it, refresh its details and choose **Join server**. Enter a password only if the host requires one.
+1. Install the same BepInEx and Moon Sweepers patcher prerequisites, start the game once, then close it.
+2. Extract `moon-client.zip` and copy its `BepInEx` folder into your own Moon Sweepers game folder, merging folders when prompted.
+3. Confirm that the DLLs are in these locations relative to your game folder:
+
+   ```text
+   BepInEx/plugins/MoonDedicated/MoonDedicated.dll
+   BepInEx/patchers/MoonDedicated/MoonLoaderCompatibility.dll
+   ```
+
+4. Start Steam and the game, then select **JOIN SERVER**.
+
+When upgrading, close the game first and keep only one active copy of each included DLL. Remove older manual copies of these two DLLs from other locations before switching to Vortex. Keep the separate Moon Sweepers BepInEx Patcher installed.
+
+### Connect
+
+Choose **Add server**, enter a label and the host's address, such as `play.example.com:27026`, then save. Select the entry, refresh its details and choose **Join server**. Enter a password if the server requires one.
 
 The browser, saved list and connection controls run inside the mod. No separate program needs to be open. The host supplies the address; there is no automatic public directory. **JOIN GAME** continues to use the original Steam lobby system. Required mods and versions are checked again by the server.
+
+For the client ZIP's instructions, see [the client guide](docs/CLIENT.md). The [Nexus listing text](docs/NEXUS-DESCRIPTION.md) includes installation steps, requirements and credits.
 
 ## Host on your Windows PC
 
