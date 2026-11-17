@@ -70,6 +70,9 @@ namespace MoonDedicated
             Hooks.Method(mask, "UploadVisualSnapshot", 4, (VisualSnapshotBudget)((self, pages, time, duration, budget, mi) => { }));
             // The footprint renderer continues to update even with -nographics.
             Hooks.Method(Game.C("MoonDustPrints"), "LateUpdate", 0, (D_Inst0)NoopInst);
+            // Graphics.RenderMeshInstanced throws "Instancing is not supported" every frame on
+            // NullGfxDevice; the resulting log flood freezes the server once canisters are dropped.
+            Hooks.Method(Game.C("MoonCanisterStreaming"), "LateUpdate", 0, (D_Inst0)NoopInst);
             Log.Info("headless graphics hooks installed");
         }
     }
