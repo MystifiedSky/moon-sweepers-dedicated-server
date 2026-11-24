@@ -24,6 +24,7 @@ Every setting has one name: `MOON_SERVER_PASSWORD` in the file and the environme
 | `MOON_STEAM_REDIST_DIR` | *(empty)* | Folder holding Valve's Steamworks redistributable (app 1007). |
 | `MOON_SERVER_FPS` | 30 | Frame cap of the headless game, 10–120. Steady pacing keeps the simulation in step with players. |
 | `MOON_STEAM_LISTING` | false | Advertise in Steam's public server list. |
+| `MOON_PAUSE_JOONAS_WHEN_EMPTY` | false | Pause JOONAS / robot vacuums while 0 players are connected (belts and machines keep running). |
 | `MOON_WINE` | wine | Linux: wine executable. |
 | `MOON_STOP_TIMEOUT` | 120 | Seconds allowed for the final save before the game is ended. |
 | `MOON_AUTO_RESTART` | 0 | Restarts after a crash. |

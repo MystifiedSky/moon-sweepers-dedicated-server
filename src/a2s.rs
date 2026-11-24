@@ -436,7 +436,7 @@ mod tests {
             players: 2,
             max_players: 8,
             password: true,
-            version: "1.0.5".into(),
+            version: "1.0.6".into(),
             steam_id: Some(90123456789012345),
             keywords: "pw".into(),
             ping_ms: 0,

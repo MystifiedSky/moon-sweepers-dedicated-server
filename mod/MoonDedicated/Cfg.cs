@@ -40,10 +40,11 @@ namespace MoonDedicated
         public static List<ModReq> RequiredMods = new List<ModReq>();
         public static ModPolicy Policy = ModPolicy.Required;
         public static bool ListInSteam;
+        public static bool PauseJoonasWhenEmpty;
         public static string RuntimeDir;
         public static string ModDir; // BepInEx/moon-ds (client side files)
         public static string InstanceId = "";
-        public const string GameVersion = "1.0.5";
+        public const string GameVersion = "1.0.6";
         public const int Protocol = 3;
         public const int SessionTimeoutSeconds = 45; // a peer silent this long is dropped
 
@@ -86,6 +87,7 @@ namespace MoonDedicated
                 default: Policy = ModPolicy.Required; break;
             }
             ListInSteam = Env("MOON_STEAM_LISTING") == "1" || Env("MOON_STEAM_LISTING").Equals("true", StringComparison.OrdinalIgnoreCase);
+            PauseJoonasWhenEmpty = Env("MOON_PAUSE_JOONAS_WHEN_EMPTY") == "1" || Env("MOON_PAUSE_JOONAS_WHEN_EMPTY").Equals("true", StringComparison.OrdinalIgnoreCase);
             RuntimeDir = Env("MOON_DS_RUNTIME");
             if (RuntimeDir.Length == 0) RuntimeDir = Path.Combine(ModDir, "runtime");
             Directory.CreateDirectory(RuntimeDir);
