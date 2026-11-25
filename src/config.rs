@@ -402,9 +402,7 @@ impl Settings {
                     self.server_fps = parse_num(k, v, 10u32, 120)?
                 }
                 "MOON_STEAM_LISTING" => self.steam_listing = parse_bool(k, v)?,
-                "MOON_PAUSE_JOONAS_WHEN_EMPTY" => {
-                    self.pause_joonas_when_empty = parse_bool(k, v)?
-                }
+                "MOON_PAUSE_JOONAS_WHEN_EMPTY" => self.pause_joonas_when_empty = parse_bool(k, v)?,
                 "MOON_EXTRA_ARGS" => self.extra_args = split_extra_args(v)?,
                 _ => {}
             }
