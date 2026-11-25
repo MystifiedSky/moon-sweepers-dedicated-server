@@ -8,7 +8,7 @@ use std::collections::BTreeMap;
 use std::path::{Path, PathBuf};
 
 pub const APP_ID: u32 = 5335510;
-pub const SUPPORTED_GAME: &str = "1.0.5";
+pub const SUPPORTED_GAME: &str = "1.0.6";
 
 #[derive(Clone, Debug, PartialEq, Eq)]
 pub struct ModReq {
@@ -94,6 +94,8 @@ pub struct Settings {
     pub steam_redist_dir: PathBuf,
     /// List the server in Steam's public server browser (default off: players join by address).
     pub steam_listing: bool,
+    /// Pause JOONAS / robot vacuums while 0 players are connected (default off).
+    pub pause_joonas_when_empty: bool,
     /// Frame cap of the headless game (steady simulation pacing; 30 like the reference setup).
     pub server_fps: u32,
 }
@@ -124,6 +126,7 @@ impl Default for Settings {
             extra_args: Vec::new(),
             steam_redist_dir: PathBuf::new(),
             steam_listing: false,
+            pause_joonas_when_empty: false,
             server_fps: 30,
         }
     }
@@ -318,6 +321,7 @@ pub const KEYS: &[&str] = &[
     "MOON_EXTRA_ARGS",
     "MOON_STEAM_REDIST_DIR",
     "MOON_STEAM_LISTING",
+    "MOON_PAUSE_JOONAS_WHEN_EMPTY",
     "MOON_SERVER_FPS",
 ];
 
@@ -398,6 +402,9 @@ impl Settings {
                     self.server_fps = parse_num(k, v, 10u32, 120)?
                 }
                 "MOON_STEAM_LISTING" => self.steam_listing = parse_bool(k, v)?,
+                "MOON_PAUSE_JOONAS_WHEN_EMPTY" => {
+                    self.pause_joonas_when_empty = parse_bool(k, v)?
+                }
                 "MOON_EXTRA_ARGS" => self.extra_args = split_extra_args(v)?,
                 _ => {}
             }
@@ -484,6 +491,14 @@ impl Settings {
             (
                 "MOON_STEAM_LISTING".into(),
                 if self.steam_listing {
+                    "1".into()
+                } else {
+                    "0".into()
+                },
+            ),
+            (
+                "MOON_PAUSE_JOONAS_WHEN_EMPTY".into(),
+                if self.pause_joonas_when_empty {
                     "1".into()
                 } else {
                     "0".into()
@@ -652,6 +667,8 @@ MOON_DATA_DIR=data
 MOON_STEAM_REDIST_DIR=
 # List the server in Steam's public server browser (off by default).
 MOON_STEAM_LISTING=false
+# Pause JOONAS / robot vacuums while 0 players are connected (off by default).
+MOON_PAUSE_JOONAS_WHEN_EMPTY=false
 # Frame cap of the headless game (10-120). Steady pacing keeps the simulation in step with players.
 MOON_SERVER_FPS=30
 # Linux only: wine binary used to run the Windows game, and the seconds allowed for a clean stop.

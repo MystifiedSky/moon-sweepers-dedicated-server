@@ -45,7 +45,7 @@ namespace MoonDedicated
         static D_Inst0 origUpdate;
         static D_Bool0 oInLobby, oIsHost, oShift;
         static D_U64_0 oLobbyId, oHostId;
-        static D_BoolU64 oIsMember, oInSteamLobby;
+        static D_BoolU64 oIsMember, oInSteamLobby, oCanExchangeWith;
         static D_Static0 oRefresh1, oRefresh2, oRefresh3, oPresence, oShare, oInvite, oPublishRemovals, oLeave;
         static D_NextCallback oNext;
 
@@ -60,6 +60,7 @@ namespace MoonDedicated
             oHostId = Hooks.Method(L, "get_HostId", 0, (D_U64_0)(mi => active ? serverId : oHostId(mi)));
             oIsMember = Hooks.Method(L, "IsMember", 1, (D_BoolU64)((id, mi) => active ? (byte)(IsMember(id) ? 1 : 0) : oIsMember(id, mi)));
             oInSteamLobby = Hooks.Method(L, "InSteamLobby", 1, (D_BoolU64)((id, mi) => active ? (byte)(IsMember(id) ? 1 : 0) : oInSteamLobby(id, mi)));
+            oCanExchangeWith = Hooks.Method(L, "CanExchangeWith", 1, (D_BoolU64)((id, mi) => active ? (byte)(IsMember(id) ? 1 : 0) : oCanExchangeWith(id, mi)));
             oRefresh1 = Hooks.Method(L, "RefreshMembers", 0, (D_Static0)(mi => { if (active) { if (connected) Publish(); } else oRefresh1(mi); }));
             oRefresh2 = Hooks.Method(L, "RefreshMembersNow", 0, (D_Static0)(mi => { if (active) { if (connected) Publish(); } else oRefresh2(mi); }));
             oRefresh3 = Hooks.Method(L, "RefreshLobby", 0, (D_Static0)(mi => { if (active) { if (connected) Publish(); } else oRefresh3(mi); }));

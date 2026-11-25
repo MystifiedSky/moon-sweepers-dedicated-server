@@ -33,6 +33,8 @@ MOON_DATA_DIR=data
 MOON_STEAM_REDIST_DIR=
 # List the server in Steam's public server browser (off by default).
 MOON_STEAM_LISTING=false
+# Pause JOONAS / robot vacuums while 0 players are connected (off by default).
+MOON_PAUSE_JOONAS_WHEN_EMPTY=false
 # Frame cap of the headless game (10-120). Steady pacing keeps the simulation in step with players.
 MOON_SERVER_FPS=30
 # Linux only: wine binary used to run the Windows game, and the seconds allowed for a clean stop.

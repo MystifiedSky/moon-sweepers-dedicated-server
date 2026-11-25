@@ -49,7 +49,7 @@ namespace MoonDedicated
         static IntPtr findWorld;
         static D_BoolInt origSigned;
         static D_BoolObjObj origShow;
-        static D_Inst0 origSteamDestroy, origWorldUpdate;
+        static D_Inst0 origSteamDestroy, origWorldUpdate, origRobotUpdate;
 
         public static bool Install()
         {
@@ -75,6 +75,7 @@ namespace MoonDedicated
             Hooks.Method(L, "get_ShiftStarted", 0, (D_Bool0)LobbyPresent);
             Hooks.Method(L, "IsMember", 1, (D_BoolU64)IsMember);
             Hooks.Method(L, "InSteamLobby", 1, (D_BoolU64)IsMember);
+            Hooks.Method(L, "CanExchangeWith", 1, (D_BoolU64)IsMember);
             foreach (var n in new[] { "RefreshMembers", "RefreshMembersNow", "RefreshLobby" }) Hooks.Method(L, n, 0, (D_Static0)RefreshMembers);
             foreach (var n in new[] { "UpdatePresence", "ShareLook", "InviteFriends", "PublishRemovals" }) Hooks.Method(L, n, 0, (D_Static0)Noop);
             Hooks.Method(L, "Create", 2, (D_Static2Int)NoopCreate);
@@ -102,6 +103,8 @@ namespace MoonDedicated
 
             Headless.Install();
             origShow = Hooks.Method(Game.KLoading, "Show", 2, (D_BoolObjObj)ShowHook);
+            var robotClass = Game.C("MoonRobotVacuum");
+            if (robotClass != IntPtr.Zero) origRobotUpdate = Hooks.Method(robotClass, "Update", 0, (D_Inst0)RobotUpdateHook);
 
             var core = Game.CoreImage;
             var app = Il2.Class(core, "UnityEngine", "Application");
@@ -113,6 +116,7 @@ namespace MoonDedicated
             Log.Info("server mode: hooks installed" + (Hooks.Failures > before ? " (" + (Hooks.Failures - before) + " failed, see warnings)" : ""));
             if (Cfg.AllowlistInvalid) Log.Warn("MOON_ALLOWED_STEAM_IDS contains an invalid SteamID: nobody can join until it is fixed");
             Log.Info("password " + (Cfg.PasswordEnabled ? "enabled" : "disabled") + ", allow-list " + (Cfg.AllowlistEnabled ? "enabled" : "disabled") + ", mod policy " + Cfg.Policy + ", required mods: " + (Cfg.RequiredMods.Count == 0 ? "none" : string.Join(", ", Cfg.RequiredMods)));
+            Log.Info("pause joonas when empty: " + (Cfg.PauseJoonasWhenEmpty ? "enabled" : "disabled"));
             return true;
         }
 
@@ -171,6 +175,11 @@ namespace MoonDedicated
         static IntPtr NoAvatar(ulong id, IntPtr mi) => IntPtr.Zero;
         static void StartShiftHook(IntPtr mi) { if (backendReady) Il2.Invoke(Game.M_SessionStartShift, IntPtr.Zero); }
         static void LeaveHook(IntPtr mi) { /* the server never leaves its own lobby */ }
+        static void RobotUpdateHook(IntPtr self, IntPtr mi)
+        {
+            if (Cfg.PauseJoonasWhenEmpty && !peers.Values.Any(p => p.Authed)) return;
+            origRobotUpdate?.Invoke(self, mi);
+        }
         static void StartSteamHook(IntPtr self, IntPtr mi) { StartServer(); }
         static void DestroyHook(IntPtr self, IntPtr mi) { Shutdown(); origSteamDestroy?.Invoke(self, mi); }
         static byte SignedHook(int slot, IntPtr mi) => slot == Cfg.Slot ? (byte)1 : (origSigned != null ? origSigned(slot, mi) : (byte)0);
